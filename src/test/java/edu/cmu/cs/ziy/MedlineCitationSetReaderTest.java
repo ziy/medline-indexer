@@ -1,19 +1,19 @@
 package edu.cmu.cs.ziy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.Set;
 
-import javax.xml.stream.XMLStreamException;
-
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import com.google.common.collect.Sets;
 
 public class MedlineCitationSetReaderTest {
 
   @Test
-  public void test() throws XMLStreamException {
+  public void test() throws SAXException, IOException {
     MedlineCitationSetReader reader = new MedlineCitationSetReader(getClass().getResourceAsStream(
             "/medsamp2014.xml"));
     Set<Integer> pmids = Sets.newHashSet();

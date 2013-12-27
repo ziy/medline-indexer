@@ -1,12 +1,17 @@
 package edu.cmu.cs.ziy;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
 
@@ -18,63 +23,51 @@ public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
 
   private static final String ABSTRACT_TEXT_ELEMENT = "AbstractText";
 
-  private static XMLInputFactory factory = XMLInputFactory.newInstance();
+  private static DocumentBuilder docBuilder;
 
-  private XMLStreamReader reader;
-
-  public MedlineCitationSetReader(InputStream inputStream) throws XMLStreamException {
-    reader = factory.createXMLStreamReader(inputStream);
+  static {
+    try {
+      docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    } catch (ParserConfigurationException e) {
+      e.printStackTrace();
+    }
   }
+
+  private NodeList citations;
+
+  public MedlineCitationSetReader(InputStream inputStream) throws SAXException, IOException {
+    Document doc = docBuilder.parse(inputStream);
+    citations = doc.getChildNodes();
+  }
+
+  private int idx = 0;
 
   @Override
   public boolean hasNext() {
-    try {
-      while (reader.hasNext()) {
-        int event = reader.next();
-        if (event == XMLStreamConstants.START_ELEMENT
-                && reader.getLocalName().equals(MEDLINE_CITATION_ELEMENT)) {
-          return true;
-        }
-      }
-    } catch (XMLStreamException e) {
-      return false;
-    }
-    return false;
+    return idx < citations.getLength();
   }
 
   @Override
   public MedlineCitation next() {
-    MedlineCitation ret = new MedlineCitation();
-    try {
-      while (reader.hasNext()) {
-        int event = reader.next();
-        if (event == XMLStreamConstants.END_ELEMENT
-                && reader.getLocalName().equals(MEDLINE_CITATION_ELEMENT)) {
-          System.out.println("store " + ret.getPmid());
-          return ret;
-        }
-        if (event != XMLStreamConstants.START_ELEMENT) {
-          continue;
-        }
-        String localName = reader.getLocalName();
-        if (localName.equals(PMID_ELEMENT)) {
-          reader.next();
-          ret.setPmid(Integer.parseInt(reader.getText().trim()));
-          System.out.println("set " + ret.getPmid());
-        } else if (localName.equals(ARTICLE_TITLE_ELEMENT)) {
-          reader.next();
-          ret.setArticleTitle(reader.getText().trim());
-        } else if (localName.equals(ABSTRACT_TEXT_ELEMENT)) {
-          reader.next();
-          ret.setAbstractText(reader.getText().trim());
-        } else {
-          continue;
-        }
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    Element e = (Element) citations.item(idx++);
+    // pmid
+    NodeList pmidNodeList = e.getElementsByTagName(PMID_ELEMENT);
+    if (pmidNodeList.getLength() == 2) 
+    assert pmidNodeList.getLength() == 1;
+    int pmid = Integer.parseInt(pmidNodeList.item(0).getTextContent());
+    // article title
+    NodeList articleTitleNodeList = e.getElementsByTagName(ARTICLE_TITLE_ELEMENT);
+    String articleTitle = null;
+    if (articleTitleNodeList.getLength() == 1) {
+      articleTitle = articleTitleNodeList.item(0).getTextContent();
     }
-    throw new RuntimeException();
+    // abstract text
+    NodeList abstractTextNodeList = e.getElementsByTagName(ABSTRACT_TEXT_ELEMENT);
+    String abstractText = null;
+    if (abstractTextNodeList.getLength() == 1) {
+      abstractText = abstractTextNodeList.item(0).getTextContent();
+    }
+    return new MedlineCitation(pmid, articleTitle, abstractText);
   }
 
   @Override

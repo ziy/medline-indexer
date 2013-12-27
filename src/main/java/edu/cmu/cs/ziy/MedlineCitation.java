@@ -8,8 +8,10 @@ public class MedlineCitation {
 
   private String abstractText;
 
-  public MedlineCitation() {
-    // TODO Auto-generated constructor stub
+  public MedlineCitation(int pmid, String articleTitle, String abstractText) {
+    this.pmid = pmid;
+    this.articleTitle = articleTitle;
+    this.abstractText = abstractText;
   }
 
   @Override
