@@ -3,15 +3,16 @@ package edu.cmu.cs.ziy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 
 public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
 
@@ -19,55 +20,58 @@ public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
 
   private static final String PMID_ELEMENT = "PMID";
 
+  private static final String ARTICLE_ELEMENT = "Article";
+
   private static final String ARTICLE_TITLE_ELEMENT = "ArticleTitle";
+
+  private static final String ABSTRACT_ELEMENT = "Abstract";
 
   private static final String ABSTRACT_TEXT_ELEMENT = "AbstractText";
 
-  private static DocumentBuilder docBuilder;
+  private static SAXBuilder builder = new SAXBuilder();
 
-  static {
-    try {
-      docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    } catch (ParserConfigurationException e) {
-      e.printStackTrace();
-    }
-  }
+  private List<Element> citations;
 
-  private NodeList citations;
-
-  public MedlineCitationSetReader(InputStream inputStream) throws SAXException, IOException {
-    Document doc = docBuilder.parse(inputStream);
-    citations = doc.getChildNodes();
+  public MedlineCitationSetReader(InputStream inputStream) throws JDOMException, IOException {
+    Document document = (Document) builder.build(inputStream);
+    Element rootNode = document.getRootElement();
+    citations = rootNode.getChildren(MEDLINE_CITATION_ELEMENT);
   }
 
   private int idx = 0;
 
   @Override
   public boolean hasNext() {
-    return idx < citations.getLength();
+    return idx < citations.size();
   }
 
   @Override
   public MedlineCitation next() {
-    Element e = (Element) citations.item(idx++);
+    Element citationElement = (Element) citations.get(idx++);
     // pmid
-    NodeList pmidNodeList = e.getElementsByTagName(PMID_ELEMENT);
-    if (pmidNodeList.getLength() == 2) 
-    assert pmidNodeList.getLength() == 1;
-    int pmid = Integer.parseInt(pmidNodeList.item(0).getTextContent());
+    int pmid = Integer.parseInt(citationElement.getChildText(PMID_ELEMENT));
+    Element articleElement = citationElement.getChild(ARTICLE_ELEMENT);
     // article title
-    NodeList articleTitleNodeList = e.getElementsByTagName(ARTICLE_TITLE_ELEMENT);
-    String articleTitle = null;
-    if (articleTitleNodeList.getLength() == 1) {
-      articleTitle = articleTitleNodeList.item(0).getTextContent();
-    }
+    String articleTitle = articleElement.getChildText(ARTICLE_TITLE_ELEMENT);
     // abstract text
-    NodeList abstractTextNodeList = e.getElementsByTagName(ABSTRACT_TEXT_ELEMENT);
-    String abstractText = null;
-    if (abstractTextNodeList.getLength() == 1) {
-      abstractText = abstractTextNodeList.item(0).getTextContent();
+    Element abstractElement = articleElement.getChild(ABSTRACT_ELEMENT);
+    if (abstractElement == null) {
+      return new MedlineCitation(pmid, articleTitle, null);
     }
+    List<String> abstractTexts = getChildrenTexts(abstractElement, ABSTRACT_TEXT_ELEMENT);
+    String abstractText = Joiner.on('\n').join(abstractTexts);
     return new MedlineCitation(pmid, articleTitle, abstractText);
+  }
+
+  private static List<String> getChildrenTexts(Element element, String cname) {
+    List<Element> childrenElements = element.getChildren(cname);
+    return Lists.transform(childrenElements, new Function<Element, String>() {
+
+      @Override
+      public String apply(Element input) {
+        return input.getText();
+      }
+    });
   }
 
   @Override
