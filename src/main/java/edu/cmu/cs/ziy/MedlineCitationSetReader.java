@@ -56,7 +56,7 @@ public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
     // abstract text
     Element abstractElement = articleElement.getChild(ABSTRACT_ELEMENT);
     if (abstractElement == null) {
-      return new MedlineCitation(pmid, articleTitle, null);
+      return new MedlineCitation(pmid, articleTitle, "");
     }
     List<String> abstractTexts = getChildrenTexts(abstractElement, ABSTRACT_TEXT_ELEMENT);
     String abstractText = Joiner.on('\n').join(abstractTexts);
