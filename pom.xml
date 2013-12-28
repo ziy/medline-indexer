@@ -65,7 +65,7 @@
         <configuration>
           <executable>java</executable>
           <arguments>
-            <argument>-Xmx1500m</argument>
+            <argument>-Xmx4000m</argument>
             <argument>-Djava.library.path=${project.build.directory}/lib/</argument>
             <argument>-classpath</argument>
             <!-- automatically creates the classpath using all project dependencies, 

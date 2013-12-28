@@ -89,6 +89,7 @@ public class MedlineCitationIndexer {
       doc.add(new TextField(ABSTRACT_TEXT_FIELD, citation.getAbstractText(), Field.Store.YES));
       writer.addDocument(doc);
     }
+    writer.commit();
   }
 
   public void optimize() throws IOException {
