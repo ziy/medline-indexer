@@ -1,4 +1,4 @@
-package edu.cmu.cs.ziy;
+package edu.cmu.lti.oaqa.bio.index.medline;
 
 import static org.junit.Assert.*;
 
@@ -9,6 +9,9 @@ import org.jdom2.JDOMException;
 import org.junit.Test;
 
 import com.google.common.collect.Sets;
+
+import edu.cmu.lti.oaqa.bio.index.medline.MedlineCitation;
+import edu.cmu.lti.oaqa.bio.index.medline.MedlineCitationSetReader;
 
 public class MedlineCitationSetReaderTest {
 

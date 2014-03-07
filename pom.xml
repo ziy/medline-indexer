@@ -6,7 +6,7 @@
     <artifactId>oaqa</artifactId>
     <version>1</version>
   </parent>
-  <groupId>edu.cmu.cs.ziy</groupId>
+  <groupId>edu.cmu.lti.oaqa.bio.index.medline</groupId>
   <artifactId>medline-indexer</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>Medline Indexer</name>
@@ -71,7 +71,7 @@
             <!-- automatically creates the classpath using all project dependencies, 
               also adding the project build directory -->
             <classpath />
-            <argument>edu.cmu.cs.ziy.MedlineCitationIndexer</argument>
+            <argument>edu.cmu.lti.oaqa.bio.index.medline.MedlineCitationIndexer</argument>
             <argument>${index.dir}</argument>
             <argument>${docs.dir}</argument>
           </arguments>

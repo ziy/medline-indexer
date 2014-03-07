@@ -1,4 +1,4 @@
-package edu.cmu.cs.ziy;
+package edu.cmu.lti.oaqa.bio.index.medline;
 
 import java.io.IOException;
 import java.io.InputStream;

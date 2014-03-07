@@ -1,9 +1,11 @@
-package edu.cmu.cs.ziy;
+package edu.cmu.lti.oaqa.bio.index.medline;
 
 import java.io.IOException;
 
 import org.jdom2.JDOMException;
 import org.junit.Test;
+
+import edu.cmu.lti.oaqa.bio.index.medline.MedlineCitationIndexer;
 
 /**
  * Maven execution: <code>
