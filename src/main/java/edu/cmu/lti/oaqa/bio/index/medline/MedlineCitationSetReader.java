@@ -33,7 +33,7 @@ public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
   private List<Element> citations;
 
   public MedlineCitationSetReader(InputStream inputStream) throws JDOMException, IOException {
-    Document document = (Document) builder.build(inputStream);
+    Document document = builder.build(inputStream);
     Element rootNode = document.getRootElement();
     citations = rootNode.getChildren(MEDLINE_CITATION_ELEMENT);
   }
@@ -47,7 +47,7 @@ public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
 
   @Override
   public MedlineCitation next() {
-    Element citationElement = (Element) citations.get(idx++);
+    Element citationElement = citations.get(idx++);
     // pmid
     int pmid = Integer.parseInt(citationElement.getChildText(PMID_ELEMENT));
     Element articleElement = citationElement.getChild(ARTICLE_ELEMENT);

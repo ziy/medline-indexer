@@ -23,7 +23,6 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 import org.jdom2.JDOMException;
 
 import com.google.common.base.Stopwatch;
@@ -61,11 +60,11 @@ public class MedlineCitationIndexer {
     } else if (!indexDir.exists()) {
       indexDir.mkdir();
     }
-    Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
-    IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46, analyzer);
+    Analyzer analyzer = new StandardAnalyzer();
+    IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
     iwc.setOpenMode(OpenMode.CREATE);
     iwc.setRAMBufferSizeMB(2000);
-    writer = new IndexWriter(FSDirectory.open(indexDir), iwc);
+    writer = new IndexWriter(FSDirectory.open(indexDir.toPath()), iwc);
   }
 
   public static Set<String> supportedExtensions = Sets.newHashSet(".xml.gz", ".xml");

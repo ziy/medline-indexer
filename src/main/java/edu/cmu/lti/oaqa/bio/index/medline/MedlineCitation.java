@@ -1,5 +1,7 @@
 package edu.cmu.lti.oaqa.bio.index.medline;
 
+import com.google.common.base.Objects;
+
 public class MedlineCitation {
 
   private int pmid;
@@ -20,49 +22,30 @@ public class MedlineCitation {
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + pmid;
-    return result;
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    MedlineCitation that = (MedlineCitation) o;
+    return Objects.equal(pmid, that.pmid);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    MedlineCitation other = (MedlineCitation) obj;
-    if (pmid != other.pmid)
-      return false;
-    return true;
+  public int hashCode() {
+    return Objects.hashCode(pmid);
   }
 
   public int getPmid() {
     return pmid;
   }
 
-  public void setPmid(int pmid) {
-    this.pmid = pmid;
-  }
-
   public String getArticleTitle() {
     return articleTitle;
   }
 
-  public void setArticleTitle(String articleTitle) {
-    this.articleTitle = articleTitle;
-  }
-
   public String getAbstractText() {
     return abstractText;
-  }
-
-  public void setAbstractText(String abstractText) {
-    this.abstractText = abstractText;
   }
 
 }

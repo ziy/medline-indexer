@@ -1,24 +1,21 @@
 package edu.cmu.lti.oaqa.bio.index.medline;
 
-import static org.junit.Assert.*;
+import com.google.common.collect.Sets;
+import org.jdom2.JDOMException;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Set;
 
-import org.jdom2.JDOMException;
-import org.junit.Test;
-
-import com.google.common.collect.Sets;
-
-import edu.cmu.lti.oaqa.bio.index.medline.MedlineCitation;
-import edu.cmu.lti.oaqa.bio.index.medline.MedlineCitationSetReader;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MedlineCitationSetReaderTest {
 
   @Test
   public void test() throws JDOMException, IOException {
     MedlineCitationSetReader reader = new MedlineCitationSetReader(getClass().getResourceAsStream(
-            "/medsamp2014.xml"));
+            "/medline/xml/medsamp2014.xml"));
     Set<Integer> pmids = Sets.newHashSet();
     while (reader.hasNext()) {
       MedlineCitation citation = reader.next();
