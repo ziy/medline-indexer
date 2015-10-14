@@ -1,18 +1,18 @@
 package edu.cmu.lti.oaqa.bio.index.medline;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
-
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
+import java.io.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
 
@@ -31,6 +31,21 @@ public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
   private static SAXBuilder builder = new SAXBuilder();
 
   private List<Element> citations;
+
+  public MedlineCitationSetReader(File file) throws IOException, JDOMException {
+    String extName = Files.getFileExtension(file.getName());
+    InputStream inputStream;
+    if (extName.equals("xml")) {
+      inputStream = new BufferedInputStream(new FileInputStream(file));
+    } else if (extName.equals("gz")) {
+      inputStream = new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)));
+    } else {
+      throw new IOException("Unsupported file format.");
+    }
+    Document document = builder.build(inputStream);
+    Element rootNode = document.getRootElement();
+    citations = rootNode.getChildren(MEDLINE_CITATION_ELEMENT);
+  }
 
   public MedlineCitationSetReader(InputStream inputStream) throws JDOMException, IOException {
     Document document = builder.build(inputStream);

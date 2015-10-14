@@ -1,18 +1,7 @@
 package edu.cmu.lti.oaqa.bio.index.medline;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.FileAlreadyExistsException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.zip.GZIPInputStream;
-
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -25,33 +14,22 @@ import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.FSDirectory;
 import org.jdom2.JDOMException;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.io.Files;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.util.Collections;
+import java.util.List;
 
 public class MedlineCitationIndexer {
 
-  private static class SuppportedExtensionFilter implements FilenameFilter {
+  private final IndexWriter writer;
 
-    @Override
-    public boolean accept(File dir, String name) {
-      for (String extension : supportedExtensions) {
-        if (name.endsWith(extension)) {
-          return true;
-        }
-      }
-      return false;
-    }
-  }
+  public static final String PMID_FIELD = "pmid";
 
-  private IndexWriter writer;
+  public static final String ARTICLE_TITLE_FIELD = "articleTitle";
 
-  public static String PMID_FIELD = "pmid";
-
-  public static String ARTICLE_TITLE_FIELD = "articleTitle";
-
-  public static String ABSTRACT_TEXT_FIELD = "abstractText";
+  public static final String ABSTRACT_TEXT_FIELD = "abstractText";
 
   public MedlineCitationIndexer(String indexPath) throws IOException {
     File indexDir = new File(indexPath);
@@ -67,19 +45,8 @@ public class MedlineCitationIndexer {
     writer = new IndexWriter(FSDirectory.open(indexDir.toPath()), iwc);
   }
 
-  public static Set<String> supportedExtensions = Sets.newHashSet(".xml.gz", ".xml");
-
   public void indexDocs(File file) throws JDOMException, IOException {
-    String extName = Files.getFileExtension(file.getName());
-    if (extName.equals("xml")) {
-      indexDocs(new BufferedInputStream(new FileInputStream(file)));
-    } else if (extName.equals("gz")) {
-      indexDocs(new BufferedInputStream(new GZIPInputStream(new FileInputStream(file))));
-    }
-  }
-
-  public void indexDocs(InputStream inputStream) throws JDOMException, IOException {
-    MedlineCitationSetReader reader = new MedlineCitationSetReader(inputStream);
+    MedlineCitationSetReader reader = new MedlineCitationSetReader(file);
     while (reader.hasNext()) {
       MedlineCitation citation = reader.next();
       Document doc = new Document();
@@ -99,18 +66,28 @@ public class MedlineCitationIndexer {
   public static void main(String[] args) throws JDOMException, IOException {
     MedlineCitationIndexer mci = new MedlineCitationIndexer(args[0]);
     File dir = new File(args[1]);
-    List<File> files = Lists.newArrayList(dir.listFiles(new SuppportedExtensionFilter()));
+    List<File> files = Lists.newArrayList(dir.listFiles(new FilenameFilter() {
+
+        @Override
+        public boolean accept(File dir, String name) {
+          return name.endsWith(".xml.gz") || name.endsWith(".xml");
+        }
+
+    }));
     Collections.sort(files);
     Stopwatch stopwatch = Stopwatch.createStarted();
     for (File file : files) {
       System.out.print("Indexing " + file.getName() + "... ");
       stopwatch.reset();
+      stopwatch.start();
       mci.indexDocs(file);
-      System.out.println(stopwatch.elapsed(TimeUnit.SECONDS) + " secs");
+      System.out.println(stopwatch);
     }
     System.out.print("Optimizing... ");
     stopwatch.reset();
+    stopwatch.start();
     mci.optimize();
-    System.out.println(stopwatch.elapsed(TimeUnit.SECONDS) + " secs");
+    System.out.println(stopwatch);
   }
+
 }
