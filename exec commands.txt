@@ -1,0 +1,22 @@
+Two use cases have been configured as exec:exec goals in the pom.xml file.
+
+Build Lucene index
+
+
+for %i in (2010,2011,2012) DO mvn -Ddocs.dir=DOCS_DIR -Dindex.dir=INDEX_Dir%i exec:exec@index
+
+
+where DOCS_DIR is the input directory that contains the downloaded .xml.gz or .xml files and INDEX_DIR is the output directory for the Lucene index.
+
+Build SQLite database
+
+mvn -Ddocs.dir=DOCS_DIR -Ddb.path=DB_PATH exec:exec@store
+
+
+where DOCS_DIR is the input directory that contains the downloaded .xml.gz or .xml files and DB_PATH is the output SQLite database file path.
+
+for %i in (1980) DO mvn -Ddocs.dir=H:\pubmed_baseline -Dindex.dir=H:\pubmed_indexes\INDEX_Dir%i exec:exec@index
+
+for %i in (2000) DO mvn -Ddocs.dir=c:\pubmed_2017\pubmed_updatefiles_16Feb17\updatefiles -Dindex.dir=c:\index\updates\INDEX_Dir%i exec:exec@index
+
+for %i in (2000) DO mvn -Ddocs.dir=c:\pubmed_2017\pubmed_baseline -Dindex.dir=c:\index\baseline17\INDEX_Dir%i exec:exec@index
