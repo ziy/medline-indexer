@@ -18,7 +18,9 @@ public class MedlineAbstractStoreChecker {
   private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME + " WHERE pmid in (%s);";
 
   public static final String PMID_FIELD = "pmid";
-
+  
+  public static final String DATE_CREATED_FIELD = "dateCreated";//added by LR 2/1/17
+  public static final String DATE_PUBLISHED_FIELD = "dateCreated";//added by LR 2/9/17
   public static final String ABSTRACT_TEXT_FIELD = "abstractText";
 
   private final Connection connection;
@@ -39,7 +41,7 @@ public class MedlineAbstractStoreChecker {
       if (abstractText == null || abstractText.trim().isEmpty()) {
         continue;
       }
-      fileMap.put(citation.getPmid(), abstractText);
+      fileMap.put(citation.getPmid(),abstractText);
     }
     Statement statement = connection.createStatement();
     String sql = String.format(SELECT_SQL, Joiner.on(',').join(fileMap.keySet()));

@@ -21,13 +21,16 @@ public class MedlineAbstractStoreBuilder {
 
   private static final String CREATE_TABLE_SQL = "CREATE TABLE " + TABLE_NAME + " (" +
                                                        "pmid INTEGER NOT NULL PRIMARY KEY, " +
+                                                       "dateCreated, "+ //added by LR 2/1/17
+                                                       "datePublished, "+ //added by LR 2/9/17
                                                        "abstract TEXT" +
                                                    ");";
 
-  private static final String INSERT_PREP_SQL = "INSERT OR REPLACE INTO " + TABLE_NAME + " VALUES (?,?);";
+  private static final String INSERT_PREP_SQL = "INSERT OR REPLACE INTO " + TABLE_NAME + " VALUES (?,?,?,?);";
 
   public static final String PMID_FIELD = "pmid";
-
+  public static final String DATE_CREATED_FIELD = "dateCreated";//added by LR 2/1/17
+  public static final String DATE_PUBLISHED_FIELD = "datePublished";//added by LR 2/9/17
   public static final String ABSTRACT_TEXT_FIELD = "abstractText";
 
   private final Connection connection;
@@ -58,7 +61,9 @@ public class MedlineAbstractStoreBuilder {
         continue;
       }
       statement.setInt(1, citation.getPmid());
-      statement.setString(2, abstractText);
+      statement.setString(2, citation.getDateCreated());//added by LR 2/1/17
+      statement.setString(3, citation.getDatePublished());//added by LR 2/9/17
+      statement.setString(4, abstractText);
 //      statement.setBytes(2, gzip(abstractText));
       statement.addBatch();
       addedCount++;

@@ -14,9 +14,10 @@ Use it
 Two use cases have been configured as `exec:exec` goals in the [`pom.xml`](pom.xml) file.
 
 __Build Lucene index__
+(kindly note that the Dir need to end with the year that you need to create the index for)
 
 ```
-mvn -Ddocs.dir=DOCS_DIR -Dindex.dir=INDEX_DIR exec:exec@index
+mvn -Ddocs.dir=DOCS_DIR -Dindex.dir=INDEX_DIR2010 exec:exec@index
 ```
 
 where `DOCS_DIR` is the _input_ directory that contains the downloaded `.xml.gz` or `.xml` files and `INDEX_DIR` is the _output_ directory for the Lucene index. 

@@ -29,7 +29,7 @@ public class MedlineCitationIndexerTest {
   @Test
   public void test() throws JDOMException, IOException, ParseException {
     File datasetDir = new File("src/test/resources/medline/gz");
-    File indexDir = new File("src/test/resources/index/lucene");
+    File indexDir = new File("src/test/resources/index/lucene2010");
     // delete index folder if it exists
     if (indexDir.exists()) {
       for (File file : indexDir.listFiles()) {
@@ -39,10 +39,11 @@ public class MedlineCitationIndexerTest {
     indexDir.delete();
     // index
     MedlineCitationIndexer
-            .main(new String[] { indexDir.getAbsolutePath(), datasetDir.getAbsolutePath()
+            .main(new String[] { indexDir.getAbsolutePath() , datasetDir.getAbsolutePath()
             });
     // search
-    IndexReader reader = DirectoryReader.open(FSDirectory.open(indexDir.toPath()));
+    
+   IndexReader reader = DirectoryReader.open(FSDirectory.open(indexDir.toPath()));
     IndexSearcher searcher = new IndexSearcher(reader);
     QueryParser parser = new MultiFieldQueryParser(new String[] { "articleTitle", "abstractText" },
             new StandardAnalyzer());

@@ -10,10 +10,16 @@ public class MedlineCitation {
 
   private String abstractText;
 
-  public MedlineCitation(int pmid, String articleTitle, String abstractText) {
+  private String dateCreated; //added by LR 2/1/17
+  
+  private String datePublished; //added by LR 2/9/17
+  
+  public MedlineCitation(int pmid, String articleTitle, String abstractText , String dateCreated,String datePublished ) {
     this.pmid = pmid;
     this.articleTitle = articleTitle;
     this.abstractText = abstractText;
+    this.dateCreated = dateCreated; //added by LR 2/1/17
+    this.datePublished = datePublished; //added by LR 2/9/17
   }
 
   @Override
@@ -47,5 +53,12 @@ public class MedlineCitation {
   public String getAbstractText() {
     return abstractText;
   }
+  
+  public String getDateCreated() {
+    return dateCreated;
+  }    //added by LR 2/1/17
 
+  public String getDatePublished() {
+    return datePublished;
+  }    //added by LR 2/9/17
 }

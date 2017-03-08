@@ -16,21 +16,39 @@ import java.util.zip.GZIPInputStream;
 
 public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
 
+  private static final String PUBMED_ARTICLE_ELEMENT = "PubmedArticle"; // added by LR 2/9/17 for med17 xml files
+  
   private static final String MEDLINE_CITATION_ELEMENT = "MedlineCitation";
 
   private static final String PMID_ELEMENT = "PMID";
 
   private static final String ARTICLE_ELEMENT = "Article";
-
+  
+  private static final String ARTICLE_JRNAL_ELEMENT = "Journal"; //added by LR 2/9/17
+  private static final String ARTICLE_JRNAL_ISS_ELEMENT = "JournalIssue"; //added by LR 2/9/17
+  
   private static final String ARTICLE_TITLE_ELEMENT = "ArticleTitle";
 
   private static final String ABSTRACT_ELEMENT = "Abstract";
 
   private static final String ABSTRACT_TEXT_ELEMENT = "AbstractText";
 
+  private static final String Date_Created_ELEMENT = "DateCreated";     //added by LR 2/1/17
+    
+  private static final String Year_Created_ELEMENT = "Year";     //added by LR 2/2/17
+  private static final String Month_Created_ELEMENT = "Month";     //added by LR 2/2/17
+  private static final String Day_Created_ELEMENT = "Day";     //added by LR 2/2/17
+  
+  private static final String Date_Published_ELEMENT = "PubDate";     //added by LR 2/9/17
+  private static final String Year_Published_ELEMENT = "Year";     //added by LR 2/9/17
+  private static final String Year_MedDate_Published_ELEMENT = "MedlineDate";     //added by LR 2/9/17
+  //private static final String Month_Published_ELEMENT = "Month";     //added by LR 2/9/17
+  
+  
   private static SAXBuilder builder = new SAXBuilder();
 
   private List<Element> citations;
+ 
 
   public MedlineCitationSetReader(File file) throws IOException, JDOMException {
     String extName = Files.getFileExtension(file.getName());
@@ -44,13 +62,13 @@ public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
     }
     Document document = builder.build(inputStream);
     Element rootNode = document.getRootElement();
-    citations = rootNode.getChildren(MEDLINE_CITATION_ELEMENT);
+    citations = rootNode.getChildren(PUBMED_ARTICLE_ELEMENT);
   }
 
   public MedlineCitationSetReader(InputStream inputStream) throws JDOMException, IOException {
     Document document = builder.build(inputStream);
     Element rootNode = document.getRootElement();
-    citations = rootNode.getChildren(MEDLINE_CITATION_ELEMENT);
+    citations = rootNode.getChildren(PUBMED_ARTICLE_ELEMENT);
   }
 
   private int idx = 0;
@@ -62,20 +80,36 @@ public class MedlineCitationSetReader implements Iterator<MedlineCitation> {
 
   @Override
   public MedlineCitation next() {
-    Element citationElement = citations.get(idx++);
+    
+    Element pubmedArticleElement = citations.get(idx++);
+    Element citationElement = pubmedArticleElement.getChild(MEDLINE_CITATION_ELEMENT);
     // pmid
     int pmid = Integer.parseInt(citationElement.getChildText(PMID_ELEMENT));
     Element articleElement = citationElement.getChild(ARTICLE_ELEMENT);
+    Element journalElement = articleElement.getChild(ARTICLE_JRNAL_ELEMENT);//added by LR 2/9/17
+    Element journalIssueElement = journalElement.getChild(ARTICLE_JRNAL_ISS_ELEMENT);//added by LR 2/9/17
+    
+    // article datecreated //added by LR 2/1/17 and updated 2/2/17
+    Element dateCreatedElement = citationElement.getChild(Date_Created_ELEMENT);
+    String dateCreated = (dateCreatedElement.getChildText(Year_Created_ELEMENT))+"-"+ (dateCreatedElement.getChildText(Month_Created_ELEMENT))+"-"+ (dateCreatedElement.getChildText(Day_Created_ELEMENT));
+    
+    // article datecPublished //added by LR 2/9/17 and updated 2/2/17
+    Element datePubElement = journalIssueElement.getChild(Date_Published_ELEMENT);
+    String datePublished = (datePubElement.getChildText(Year_Published_ELEMENT));
+    if (datePublished == null)
+        { datePublished = (datePubElement.getChildText(Year_MedDate_Published_ELEMENT));}
+               
+    
     // article title
     String articleTitle = articleElement.getChildText(ARTICLE_TITLE_ELEMENT);
     // abstract text
     Element abstractElement = articleElement.getChild(ABSTRACT_ELEMENT);
     if (abstractElement == null) {
-      return new MedlineCitation(pmid, articleTitle, "");
+      return new MedlineCitation(pmid, articleTitle, "", dateCreated, datePublished);
     }
     List<String> abstractTexts = getChildrenTexts(abstractElement, ABSTRACT_TEXT_ELEMENT);
     String abstractText = Joiner.on('\n').join(abstractTexts);
-    return new MedlineCitation(pmid, articleTitle, abstractText);
+    return new MedlineCitation(pmid, articleTitle, abstractText, dateCreated,datePublished);
   }
 
   private static List<String> getChildrenTexts(Element element, String cname) {
